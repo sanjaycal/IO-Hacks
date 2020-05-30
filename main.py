@@ -45,13 +45,16 @@ class person():
         self.store = which_store
         self.num = 0
     def infect(self,other_person):
-        if self.vulnerable == 3:
-            if random.randint(0,50)<chance_of_infection:
+        if other_person.vulnerable == 3:
+            if random.randint(0,60)<chance_of_infection:
                 other_person.infected = True
         else:
             if random.randint(0,100)<chance_of_infection:
                 other_person.infected = True
     def update(self):
+        if self.vulnerable == 3:
+            self.chance_of_death = chance_of_death * 2
+            self.time_until_immune = time_until_immune * 2
         if self.infected == True:
             self.count = self.count+1
         if self.count >=time_until_spreader and self.infecting == False:
