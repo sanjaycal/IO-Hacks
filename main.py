@@ -12,11 +12,11 @@ dy = 480
 spread_distance = 10
 time_until_spreader = 1440
 time_until_immune = 2880
-chance_of_infection = 50
-store = [120,240]
+chance_of_infection = 90
+store = [random.randint(0,dx),random.randint(0,dy)]
 time = 0
 time_needed_in_store = 60
-chance_of_death = 100
+chance_of_death = 5
 s = 5
 class person():
     def __init__(self, infected, dead, immune,x,y,store_start):
@@ -93,7 +93,7 @@ while True:
         person.update()
         if person.infected == True:
             if random.randint(0,100) <= chance_of_death:
-                if time == person.store_start:
+                if time> person.store_start-120 and time<person.store_start-115:
                     person.dead = True
                     person.infected = False
                     person.infecting = False
