@@ -124,6 +124,8 @@ while True:
             if person.infecting:
                 pygame.draw.circle(display, pygame.Color(100,0,0), [int(person.x),int(person.y)], spread_distance)
             pygame.draw.circle(display, pygame.Color(255,0,0), [int(person.x),int(person.y)], s)
+            if person.vulnerable == 3:
+                pygame.draw.circle(display, pygame.Color(255,125,255), [int(person.x),int(person.y)], s)
         elif person.immune:
             if person.dead:
                 pygame.draw.circle(display, pygame.Color(0,0,0), [int(person.x),int(person.y)], s)
