@@ -10,6 +10,7 @@ dx = 640
 dy = 480
 
 spread_distance = 10
+social_diststancing_distance = 12
 time_until_spreader = 1440
 time_until_immune = 2880
 chance_of_infection = 50
@@ -18,8 +19,8 @@ time = 0
 time_needed_in_store = 60
 chance_of_death = 5
 s = 5
-community_size_x = 100
-community_size_y = 100
+community_size_x = 400
+community_size_y = 400
 class community():
     def __init__(self,tl_corner,width, height):
         self.tl_corner = tl_corner
@@ -64,6 +65,12 @@ class person():
             d = math.sqrt((goal[0]-self.x)*(goal[0]-self.x)+(goal[1]-self.y)*(goal[1]-self.y))
             self.x = (goal[0]-self.x)/(d+1)+self.x
             self.y = (goal[1]-self.y)/(d+1)+self.y
+    def move_away_from(self,object,distance):
+        if self.dead == False:
+            d = math.sqrt((object[0]-self.x)*(object[0]-self.x)+(object[1]-self.y)*(object[1]-self.y))
+            if d<distance:
+                self.x = (-(object[0]-self.x)/(d+1))+self.x
+                self.y = (-(object[1]-self.y)/(d+1))+self.y
 
 def generate_people(num,num_infected, community_ditrobution, num_communities):
     people = []
@@ -98,6 +105,19 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_q:
+                social_diststancing_distance +=1
+            if event.key == pygame.K_a:
+                social_diststancing_distance -=1
+            if event.key == pygame.K_w:
+                spread_distance +=1
+            if event.key == pygame.K_s:
+                spread_distance -=1
+            if event.key == pygame.K_e:
+                chance_of_infection +=1
+            if event.key == pygame.K_d:
+                chance_of_infection -=1
     pygame.draw.rect(display, pygame.Color(255,255,255),pygame.Rect(0,0,int(dx),int(dy)))
     for person in people:
         if person.infected:
@@ -115,6 +135,7 @@ while True:
             else:
                 pygame.draw.circle(display, pygame.Color(125,0,255), [int(person.x),int(person.y)], s)
         else:
+            pygame.draw.circle(display, pygame.Color(0,100,0), [int(person.x),int(person.y)], int((social_diststancing_distance-s)/2)+s)
             pygame.draw.circle(display, pygame.Color(0,255,0), [int(person.x),int(person.y)], s)
         person.update()
         if person.infected == True:
@@ -131,9 +152,18 @@ while True:
                         operson.infect(person)
         if time > person.store_start and time < person.store_end:
             person.move(store[person.store])
+            for persond in people:
+                person.move_away_from([persond.x,persond.y],social_diststancing_distance)
+            
         else:
             person.move(person.home)
+            if person.x == person.home[0] and person.y == person.home[1]:
+                for persond in people:
+                    if persond.x != persond.home[0] and persond.y != persond.home[1]:
+                        person.move_away_from([persond.x,persond.y],social_diststancing_distance)
     pygame.draw.rect(display,pygame.Color(0,100,100), pygame.Rect(store[0][0]-5,store[0][1]-5,10,10))
     pygame.draw.rect(display,pygame.Color(0,100,100), pygame.Rect(store[1][0]-5,store[1][1]-5,10,10))
+    pygame.draw.circle(display, pygame.Color(0,100,0), [30,30], int((social_diststancing_distance-s)/2)+s)
+    pygame.draw.circle(display, pygame.Color(100,0,0), [90,30], spread_distance)
     pygame.display.update()
     clock.tick(FPS)
