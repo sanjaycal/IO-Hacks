@@ -32,6 +32,7 @@ class person():
         self.count = 0
         self.dead = dead
         self.immune = immune
+        self.vulnerable = random.randint(1,3)
         self.x = x
         self.y = y
         self.home = [x,y]
@@ -41,8 +42,12 @@ class person():
         self.store_end = store_start+time_needed_in_store
         self.store = which_store
     def infect(self,other_person):
-        if random.randint(0,100)<chance_of_infection:
-            other_person.infected = True
+        if self.vulnerable == 3:
+            if random.randint(0,50)<chance_of_infection:
+                other_person.infected = True
+        else:
+            if random.randint(0,100)<chance_of_infection:
+                other_person.infected = True
     def update(self):
         if self.infected == True:
             self.count = self.count+1
@@ -104,6 +109,11 @@ while True:
                 pygame.draw.circle(display, pygame.Color(0,0,0), [int(person.x),int(person.y)], s)
             else:
                 pygame.draw.circle(display, pygame.Color(0,0,255), [int(person.x),int(person.y)], s)
+        elif person.vulnerable == 3:
+            if person.dead:
+                pygame.draw.circle(display, pygame.Color(0,0,0), [int(person.x),int(person.y)], s)
+            else:
+                pygame.draw.circle(display, pygame.Color(125,0,255), [int(person.x),int(person.y)], s)
         else:
             pygame.draw.circle(display, pygame.Color(0,255,0), [int(person.x),int(person.y)], s)
         person.update()
