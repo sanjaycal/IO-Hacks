@@ -4,31 +4,41 @@ import sys
 import random
 import math
 
+
+#define pygame variables
 FPS = 120
-air_resistance = 0.97
 dx = 640
 dy = 480
+s = 5
 
+
+#define simulation variables
 spread_distance = 1
 social_diststancing_distance = 1
 time_until_spreader = 1440
 time_until_immune = 2880
 chance_of_infection = 50
-store = [[random.randint(0,dx),random.randint(0,dy)],[random.randint(0,dx),random.randint(0,dy)]]
 time = 0
 time_needed_in_store = 60
 chance_of_death = 5
-s = 5
 community_size_x = 100
 community_size_y = 100
 chance_of_going_to_other_community = 50
+speed = 1
+communities = []
+
+#define classes that are being used
+
+#defining the community class, so we can create a list of communities easier
 class community():
     def __init__(self,tl_corner,width, height):
         self.tl_corner = tl_corner
         self.width = width
         self.height = height
 
+#defining the person class, to make it easier to deal with the cariables we need to assign to a person
 class person():
+    # in init, we define all of the variables that a person nneds in order to work in the simulation
     def __init__(self, infected, dead, immune,x,y,store_start,which_store):
         self.infected = infected
         self.count = 0
@@ -44,6 +54,8 @@ class person():
         self.store_end = store_start+time_needed_in_store
         self.store = which_store
         self.num = 0
+
+    #we use this to infect the other person. If this person is infected, it can infect others.
     def infect(self,other_person):
         if other_person.vulnerable == 3:
             if random.randint(0,60)<chance_of_infection:
@@ -51,6 +63,8 @@ class person():
         else:
             if random.randint(0,100)<chance_of_infection:
                 other_person.infected = True
+
+    #this updated the inbuilt counter in eacch person to deal with changes from infected to immune
     def update(self):
         if self.vulnerable == 3:
             self.chance_of_death = chance_of_death * 2
@@ -65,20 +79,24 @@ class person():
             self.infected = False
             self.immune = True
             self.count = 0
+
+    #moves the person to a goal
     def move(self,goal):
         if self.dead == False:
             d = math.sqrt((goal[0]-self.x)*(goal[0]-self.x)+(goal[1]-self.y)*(goal[1]-self.y))
-            self.x = (goal[0]-self.x)/(d+1)+self.x
-            self.y = (goal[1]-self.y)/(d+1)+self.y
+            self.x = (speed*goal[0]-self.x)/(d+1)+self.x
+            self.y = (speed*goal[1]-self.y)/(d+1)+self.y
+
+    #moves the person away from an object
     def move_away_from(self,object,distance):
         if self.dead == False:
             d = math.sqrt((object[0]-self.x)*(object[0]-self.x)+(object[1]-self.y)*(object[1]-self.y))
             if d<distance:
-                self.x = (-(object[0]-self.x)/(d+1))+self.x
-                self.y = (-(object[1]-self.y)/(d+1))+self.y
+                self.x = (-(speed*object[0]-self.x)/(d+1))+self.x
+                self.y = (-(speed*object[1]-self.y)/(d+1))+self.y
 
-communities = []
 
+#this is a function that generates people for the start of the simulation
 def generate_people(num,num_infected, community_ditrobution, num_communities):
     people = []
     for i in range(num_communities):
@@ -94,19 +112,23 @@ def generate_people(num,num_infected, community_ditrobution, num_communities):
             people.append(a)
     return people
 
-
+#this is where we call the function that generates people
 people = generate_people(100,2,[30],2)
 
-
+#we set up the boilerplate for pygame here
 pygame.init()
-
 display = pygame.display.set_mode((dx, dy))
 clock = pygame.time.Clock()
 
+
+#this is the main loop for the simulation that does the simulating
 while True:
+    #keeps track of the time, so we can have the peole be on a schedule
     time += 1
     if time>1440:
         time-=1440
+
+    #deals with all of the pygame events, eg quitting, and button pressing 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
@@ -123,8 +145,13 @@ while True:
                 chance_of_infection +=1
             if event.key == pygame.K_d:
                 chance_of_infection -=1
+
+    #draws the background
     pygame.draw.rect(display, pygame.Color(255,255,255),pygame.Rect(0,0,int(dx),int(dy)))
+
+    # this is the loop where we do all of the computations for every person
     for person in people:
+        # this code draws the person and any areas of effect they have(e.g. social distancing distance, infection spread distance etc.)
         if person.infected:
             if person.infecting != True :
                 pygame.draw.circle(display, pygame.Color(0,100,0), [int(person.x),int(person.y)], int((social_diststancing_distance-s)/2)+s)
@@ -152,7 +179,11 @@ while True:
         else:
             pygame.draw.circle(display, pygame.Color(0,100,0), [int(person.x),int(person.y)], int((social_diststancing_distance-s)/2)+s)
             pygame.draw.circle(display, pygame.Color(0,255,0), [int(person.x),int(person.y)], s)
+        
+        #this updates the inbuilt counter in every person
         person.update()
+
+        #this code handles the killing of people
         if person.infected == True:
             if random.randint(0,100) <= chance_of_death:
                 if time> person.store_start-120 and time<person.store_start-115:
@@ -160,14 +191,20 @@ while True:
                     person.infected = False
                     person.infecting = False
                     person.immune = True
+
+        #this code handles the infecting of new people by the disease
         if person.immune == False and person.infected == False:
             for operson in people:
                 if operson.infecting == True:
                     if (operson.x-person.x)*(operson.x-person.x)+(operson.y-person.y)*(operson.y-person.y)<spread_distance*spread_distance:
                         operson.infect(person)
+        
+        #this code is so that randomness doesnt change every minute, and the person doesnt become a spazzy mess
         if time >5 and time<10:
             person.num = random.randint(0,100)
-            print(person.num)
+
+        #this code moves the person
+        #This code moves people to the store at certain times of day
         if time > person.store_start and time < person.store_end:
             if person.num< chance_of_going_to_other_community:
                 person.move(store[person.store])
@@ -175,16 +212,22 @@ while True:
                 person.move(store[person.store-1])
             for persond in people:
                 person.move_away_from([persond.x,persond.y],social_diststancing_distance)
-            
+        #this code move people home every other time of day 
         else:
             person.move(person.home)
             if person.x == person.home[0] and person.y == person.home[1]:
                 for persond in people:
                     if persond.x != persond.home[0] and persond.y != persond.home[1]:
                         person.move_away_from([persond.x,persond.y],social_diststancing_distance)
+
+    #this code draws the stores
     pygame.draw.rect(display,pygame.Color(0,100,100), pygame.Rect(store[0][0]-5,store[0][1]-5,10,10))
     pygame.draw.rect(display,pygame.Color(0,100,100), pygame.Rect(store[1][0]-5,store[1][1]-5,10,10))
+
+    #this code draws the UI
     pygame.draw.circle(display, pygame.Color(0,100,0), [30,30], int((social_diststancing_distance-s)/2)+s)
     pygame.draw.circle(display, pygame.Color(100,0,0), [90,30], spread_distance)
+
+    #this code is to make pygame execute on all of the changes we have made
     pygame.display.update()
     clock.tick(FPS)
