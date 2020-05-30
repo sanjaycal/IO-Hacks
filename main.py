@@ -2,54 +2,111 @@ import pygame
 import time
 import sys
 import random
+import math
 
-spread_distance = 600
-time_until_spreader = 50
-chance_of_infection = 0.5
+FPS = 120
+air_resistance = 0.97
+dx = 640
+dy = 480
+
+spread_distance = 10
+time_until_spreader = 1440
+time_until_immune = 2880
+chance_of_infection = 50
+store = [120,240]
+time = 0
+time_needed_in_store = 60
+chance_of_death = 100
+s = 5
 class person():
-    def __init__(self, infected, dead, immune,x,y):
+    def __init__(self, infected, dead, immune,x,y,store_start):
         self.infected = infected
         self.count = 0
         self.dead = dead
         self.immune = immune
         self.x = x
         self.y = y
+        self.home = [x,y]
         self.infecting = False
+        self.distance_to_store = math.sqrt((store[0]-self.home[0])*(store[0]-self.home[0])+(store[1]-self.home[1])*(store[1]-self.home[1]))
+        self.store_start = store_start-self.distance_to_store
+        self.store_end = store_start+time_needed_in_store
     def infect(self,other_person):
-        if self.infecting and random.randint(0,100)<chance_of_infection:
+        if random.randint(0,100)<chance_of_infection:
             other_person.infected = True
     def update(self):
         if self.infected == True:
-            if self.infecting == False:
-                self.count = self.count+1
-        if self.count >=time_until_spreader:
+            self.count = self.count+1
+        if self.count >=time_until_spreader and self.infecting == False:
             self.infecting = True 
+            self.count = 0
+        if self.count >=time_until_immune  and self.infecting == True:
+            self.infecting = False 
+            self.infected = False
+            self.immune = True
+            self.count = 0
+    def move(self,goal):
+        if self.dead == False:
+            d = math.sqrt((goal[0]-self.x)*(goal[0]-self.x)+(goal[1]-self.y)*(goal[1]-self.y))
+            self.x = (goal[0]-self.x)/(d+1)+self.x
+            self.y = (goal[1]-self.y)/(d+1)+self.y
 
-bob = person(True, False, False,36,82)
-Steve = person(False, False, False,82,36)
-people = [bob,Steve]
+def generate_people(num,num_infected):
+    people = []
+    for i in range(num):
+        if i < num_infected:
+            a = person(True,False,False, random.randint(0,dx), random.randint(0,dy), random.randint(120,1440))
+            people.append(a)
+        if i >= num_infected:
+            a = person(False,False,False, random.randint(0,dx), random.randint(0,dy), random.randint(120,1440))
+            people.append(a)
+    return people
+
+
+people = generate_people(100,2)
 
 
 pygame.init()
-FPS = 30
-air_resistance = 0.97
-dx = 640
-dy = 480
+
 display = pygame.display.set_mode((dx, dy))
 clock = pygame.time.Clock()
-s = 5
+
 while True:
+    time += 1
+    print(time)
+    if time>1440:
+        time-=1440
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
-    pygame.draw.rect(display, pygame.Color(255,255,255),pygame.Rect(0,0,dx,dy))
+    pygame.draw.rect(display, pygame.Color(255,255,255),pygame.Rect(0,0,int(dx),int(dy)))
     for person in people:
-        pygame.draw.circle(display, pygame.Color(255*person.infected,255-255*person.infected,255-255*person.infected), [int(person.x),int(person.y)], s)
+        if person.infected:
+            pygame.draw.circle(display, pygame.Color(255,0,0), [int(person.x),int(person.y)], s)
+        elif person.immune:
+            if person.dead:
+                pygame.draw.circle(display, pygame.Color(0,0,0), [int(person.x),int(person.y)], s)
+            else:
+                pygame.draw.circle(display, pygame.Color(0,0,255), [int(person.x),int(person.y)], s)
+        else:
+            pygame.draw.circle(display, pygame.Color(0,255,0), [int(person.x),int(person.y)], s)
         person.update()
+        if person.infected == True:
+            if random.randint(0,100) <= chance_of_death:
+                if time == person.store_start:
+                    person.dead = True
+                    person.infected = False
+                    person.infecting = False
+                    person.immune = True
         if person.immune == False and person.infected == False:
             for operson in people:
                 if operson.infecting == True:
-                    if (operson.x-person.x)^2+(operson.y-person.y)^2<spread_distance^2:
+                    if (operson.x-person.x)*(operson.x-person.x)+(operson.y-person.y)*(operson.y-person.y)<spread_distance*spread_distance:
                         operson.infect(person)
+        if time > person.store_start and time < person.store_end:
+            person.move(store)
+        else:
+            person.move(person.home)
+    pygame.draw.rect(display,pygame.Color(0,100,100), pygame.Rect(store[0]-5,store[1]-5,10,10))
     pygame.display.update()
     clock.tick(FPS)
