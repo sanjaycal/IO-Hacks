@@ -100,6 +100,19 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_q:
+                social_diststancing_distance +=1
+            if event.key == pygame.K_a:
+                social_diststancing_distance -=1
+            if event.key == pygame.K_w:
+                spread_distance +=1
+            if event.key == pygame.K_s:
+                spread_distance -=1
+            if event.key == pygame.K_e:
+                chance_of_infection +=1
+            if event.key == pygame.K_d:
+                chance_of_infection -=1
     pygame.draw.rect(display, pygame.Color(255,255,255),pygame.Rect(0,0,int(dx),int(dy)))
     for person in people:
         if person.infected:
@@ -140,5 +153,7 @@ while True:
                         person.move_away_from([persond.x,persond.y],social_diststancing_distance)
     pygame.draw.rect(display,pygame.Color(0,100,100), pygame.Rect(store[0][0]-5,store[0][1]-5,10,10))
     pygame.draw.rect(display,pygame.Color(0,100,100), pygame.Rect(store[1][0]-5,store[1][1]-5,10,10))
+    pygame.draw.circle(display, pygame.Color(0,100,0), [30,30], int((social_diststancing_distance-s)/2)+s)
+    pygame.draw.circle(display, pygame.Color(100,0,0), [90,30], spread_distance)
     pygame.display.update()
     clock.tick(FPS)
