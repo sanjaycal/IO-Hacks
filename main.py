@@ -92,7 +92,7 @@ def generate_people(num,num_infected, community_ditrobution, num_communities):
     return people
 
 
-people = generate_people(1,0,[30],2)
+people = generate_people(100,2,[30],2)
 
 
 pygame.init()
