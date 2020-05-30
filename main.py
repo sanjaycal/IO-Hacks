@@ -18,6 +18,13 @@ time = 0
 time_needed_in_store = 60
 chance_of_death = 5
 s = 5
+community_size_x = 100
+community_size_y = 100
+class community():
+    def __init__(self,tl_corner,width, height):
+        self.tl_corner = tl_corner
+        self.width = width
+        self.height = height
 
 class person():
     def __init__(self, infected, dead, immune,x,y,store_start,which_store):
@@ -53,19 +60,24 @@ class person():
             self.x = (goal[0]-self.x)/(d+1)+self.x
             self.y = (goal[1]-self.y)/(d+1)+self.y
 
-def generate_people(num,num_infected, store_ditrobution):
+def generate_people(num,num_infected, community_ditrobution, num_communities):
     people = []
+    communities = []
+    for i in range(num_communities):
+        a = community([random.randint(0,dx-community_size_x),random.randint(0,dy-community_size_y)],community_size_x,community_size_y)
+        communities.append(a)
+        store[i] = [random.randint(a.tl_corner[0],a.tl_corner[0]+community_size_x), random.randint(a.tl_corner[1],a.tl_corner[1]+community_size_y)]
     for i in range(num):
-        if i < store_ditrobution[0]:
-            a = person(i < num_infected,False,False, random.randint(0,dx/10)*10, random.randint(0,dy/10)*10, random.randint(120,1440),0)
+        if i < community_ditrobution[0]:
+            a = person(i < num_infected,False,False, random.randint(communities[0].tl_corner[0],communities[0].tl_corner[0]+community_size_x), random.randint(communities[0].tl_corner[1],communities[0].tl_corner[1]+community_size_y), random.randint(120,1440),0)
             people.append(a)
-        if i >= store_ditrobution[0]:
-            a = person(i < num_infected,False,False, random.randint(0,dx/10)*10, random.randint(0,dy/10)*10, random.randint(120,1440),1)
+        if i >= community_ditrobution[0]:
+            a = person(i < num_infected,False,False, random.randint(communities[1].tl_corner[0],communities[1].tl_corner[0]+community_size_x), random.randint(communities[1].tl_corner[1],communities[1].tl_corner[1]+community_size_y), random.randint(120,1440),1)
             people.append(a)
     return people
 
 
-people = generate_people(100,2,[30])
+people = generate_people(100,2,[30],2)
 
 
 pygame.init()
