@@ -2,7 +2,7 @@ import pygame
 import time
 import sys
 class person():
-    __init__(self, infected, dead, immune,x,y):
+    def __init__(self, infected, dead, immune,x,y):
         self.infected = infected
         self.dead = dead
         self.immune = immune
