@@ -30,8 +30,9 @@ chance_of_going_to_other_community = 50
 speed = 1
 social_distancing_factor_scale = 1
 communities = []
-
 store = []
+live_toll = 100
+dead_toll = 0
 
 #define classes that are being used
 
@@ -125,6 +126,7 @@ people = generate_people(100,2,[30],2)
 #we set up the boilerplate for pygame here
 pygame.init()
 display = pygame.display.set_mode((dx, dy))
+pygame.display.set_caption("Pandemic Simulator")
 clock = pygame.time.Clock()
 
 
@@ -158,6 +160,9 @@ while True:
     # this is the loop where we do all of the computations for every person
     for person in people:
         # this code draws the person and any areas of effect they have(e.g. social distancing distance, infection spread distance etc.)
+        if person.dead:
+            live_toll = live_toll - 1
+            dead_toll = dead_toll + 1
         if person.infected:
             if person.infecting != True :
                 pygame.draw.circle(display, pygame.Color(0,100,0), [int(person.x),int(person.y)], int((social_diststancing_distance*person.social_distancing_factor-s)/2)+s)
