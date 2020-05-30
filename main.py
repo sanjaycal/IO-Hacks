@@ -11,6 +11,9 @@ dx = 640
 dy = 480
 s = 5
 
+#import image
+backgroundMap = pygame.image.load('cityMap.jpg')
+
 
 #define simulation variables
 spread_distance = 1
@@ -27,6 +30,7 @@ chance_of_going_to_other_community = 50
 speed = 1
 social_distancing_factor_scale = 1
 communities = []
+
 store = []
 
 #define classes that are being used
@@ -150,8 +154,7 @@ while True:
                 chance_of_infection -=1
 
     #draws the background
-    pygame.draw.rect(display, pygame.Color(255,255,255),pygame.Rect(0,0,int(dx),int(dy)))
-
+    display.blit(backgroundMap, (0,-400))
     # this is the loop where we do all of the computations for every person
     for person in people:
         # this code draws the person and any areas of effect they have(e.g. social distancing distance, infection spread distance etc.)
