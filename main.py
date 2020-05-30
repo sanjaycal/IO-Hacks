@@ -9,8 +9,8 @@ air_resistance = 0.97
 dx = 640
 dy = 480
 
-spread_distance = 10
-social_diststancing_distance = 12
+spread_distance = 1
+social_diststancing_distance = 1
 time_until_spreader = 1440
 time_until_immune = 2880
 chance_of_infection = 50
@@ -19,8 +19,9 @@ time = 0
 time_needed_in_store = 60
 chance_of_death = 5
 s = 5
-community_size_x = 400
-community_size_y = 400
+community_size_x = 100
+community_size_y = 100
+chance_of_going_to_other_community = 50
 class community():
     def __init__(self,tl_corner,width, height):
         self.tl_corner = tl_corner
@@ -42,6 +43,7 @@ class person():
         self.store_start = store_start-self.distance_to_store
         self.store_end = store_start+time_needed_in_store
         self.store = which_store
+        self.num = 0
     def infect(self,other_person):
         if self.vulnerable == 3:
             if random.randint(0,50)<chance_of_infection:
@@ -72,9 +74,10 @@ class person():
                 self.x = (-(object[0]-self.x)/(d+1))+self.x
                 self.y = (-(object[1]-self.y)/(d+1))+self.y
 
+communities = []
+
 def generate_people(num,num_infected, community_ditrobution, num_communities):
     people = []
-    communities = []
     for i in range(num_communities):
         a = community([random.randint(0,dx-community_size_x),random.randint(0,dy-community_size_y)],community_size_x,community_size_y)
         communities.append(a)
@@ -99,7 +102,6 @@ clock = pygame.time.Clock()
 
 while True:
     time += 1
-    print(time)
     if time>1440:
         time-=1440
     for event in pygame.event.get():
@@ -121,8 +123,15 @@ while True:
     pygame.draw.rect(display, pygame.Color(255,255,255),pygame.Rect(0,0,int(dx),int(dy)))
     for person in people:
         if person.infected:
+            if person.infecting != True :
+                pygame.draw.circle(display, pygame.Color(0,100,0), [int(person.x),int(person.y)], int((social_diststancing_distance-s)/2)+s)
             if person.infecting:
-                pygame.draw.circle(display, pygame.Color(100,0,0), [int(person.x),int(person.y)], spread_distance)
+                if spread_distance> ((social_diststancing_distance-s)/2)+s:
+                    pygame.draw.circle(display, pygame.Color(100,0,0), [int(person.x),int(person.y)], spread_distance)
+                    pygame.draw.circle(display, pygame.Color(0,100,0), [int(person.x),int(person.y)], int((social_diststancing_distance-s)/2)+s)
+                else:
+                    pygame.draw.circle(display, pygame.Color(0,100,0), [int(person.x),int(person.y)], int((social_diststancing_distance-s)/2)+s)
+                    pygame.draw.circle(display, pygame.Color(100,0,0), [int(person.x),int(person.y)], spread_distance)
             pygame.draw.circle(display, pygame.Color(255,0,0), [int(person.x),int(person.y)], s)
         elif person.immune:
             if person.dead:
@@ -133,6 +142,7 @@ while True:
             if person.dead:
                 pygame.draw.circle(display, pygame.Color(0,0,0), [int(person.x),int(person.y)], s)
             else:
+                pygame.draw.circle(display, pygame.Color(50,0,50), [int(person.x),int(person.y)], int((social_diststancing_distance-s)/2)+s)
                 pygame.draw.circle(display, pygame.Color(125,0,255), [int(person.x),int(person.y)], s)
         else:
             pygame.draw.circle(display, pygame.Color(0,100,0), [int(person.x),int(person.y)], int((social_diststancing_distance-s)/2)+s)
@@ -150,8 +160,14 @@ while True:
                 if operson.infecting == True:
                     if (operson.x-person.x)*(operson.x-person.x)+(operson.y-person.y)*(operson.y-person.y)<spread_distance*spread_distance:
                         operson.infect(person)
+        if time >5 and time<10:
+            person.num = random.randint(0,100)
+            print(person.num)
         if time > person.store_start and time < person.store_end:
-            person.move(store[person.store])
+            if person.num< chance_of_going_to_other_community:
+                person.move(store[person.store])
+            else:
+                person.move(store[person.store-1])
             for persond in people:
                 person.move_away_from([persond.x,persond.y],social_diststancing_distance)
             
