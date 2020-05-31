@@ -16,7 +16,7 @@ background = pygame.image.load('Grid.jpeg')
 
 
 #define simulation variables
-spread_distance = 1
+spread_distance = 10
 social_diststancing_distance = 1
 time_until_spreader = 100
 time_until_immune = 2880
@@ -31,9 +31,9 @@ speed = 1
 social_distancing_factor_scale = 1
 communities = []
 store = []
-live_toll = 100
 dead_toll = 0
 num_people = 100
+live_toll = num_people
 #define classes that are being used
 
 #defining the community class, so we can create a list of communities easier
@@ -249,11 +249,11 @@ while True:
     pygame.draw.circle(display, pygame.Color(0,0,255), [dx - 30, 30], 30)
     if infected+dead_toll+immune>dead_toll and infected+dead_toll+immune>immune:
         pygame.draw.circle(display, pygame.Color(255,0,0), [dx - 30,30], int(((infected+dead_toll+immune)/num_people)*30))
-        if dead_toll>immune:
-            pygame.draw.circle(display, pygame.Color(0,0,0), [dx - 30,30], int(dead_toll*30/num_people))
+        if dead_toll>=immune:
+            pygame.draw.circle(display, pygame.Color(0,0,0), [dx - 30,30], int(((dead_toll+immune)/num_people)*30))
             pygame.draw.circle(display, pygame.Color(0,0,100), [dx - 30,30], int(immune*30/num_people))
         else:
-            pygame.draw.circle(display, pygame.Color(0,0,100), [dx - 30,30], int(immune*30/num_people))
+            pygame.draw.circle(display, pygame.Color(0,0,100), [dx - 30,30], int(((dead_toll+immune)/num_people)*30))
             pygame.draw.circle(display, pygame.Color(0,0,0), [dx - 30,30], int(dead_toll*30/num_people))
 
     #this code is to make pygame execute on all of the changes we have made
