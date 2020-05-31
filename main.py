@@ -33,7 +33,7 @@ communities = []
 store = []
 live_toll = 100
 dead_toll = 0
-
+num_people = 100
 #define classes that are being used
 
 #defining the community class, so we can create a list of communities easier
@@ -121,7 +121,7 @@ def generate_people(num,num_infected, community_ditrobution, num_communities):
     return people
 
 #this is where we call the function that generates people
-people = generate_people(100,2,[30],2)
+people = generate_people(num_people,2,[30],2)
 
 #we set up the boilerplate for pygame here
 pygame.init()
@@ -136,7 +136,8 @@ while True:
     time += 1
     if time>1440:
         time-=1440
-
+    dead_toll = 0
+    live_toll = num_people
     #deals with all of the pygame events, eg quitting, and button pressing 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -238,6 +239,8 @@ while True:
     #this code draws the UI
     pygame.draw.circle(display, pygame.Color(0,100,0), [30,30], int((social_diststancing_distance-s)/2)+s)
     pygame.draw.circle(display, pygame.Color(100,0,0), [90,30], spread_distance)
+    pygame.draw.circle(display, pygame.Color(0,0,255), [dx - 30, 30], 30)
+    pygame.draw.circle(display, pygame.Color(0,0,0), [dx - 30,30], int(dead_toll*30/num_people))
 
     #this code is to make pygame execute on all of the changes we have made
     pygame.display.update()
