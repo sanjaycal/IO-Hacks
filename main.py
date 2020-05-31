@@ -12,7 +12,7 @@ dy = 480
 s = 5
 
 #import image
-backgroundMap = pygame.image.load('cityMap.jpg')
+background = pygame.image.load('Grid.jpeg')
 
 
 #define simulation variables
@@ -156,7 +156,7 @@ while True:
                 chance_of_infection -=1
 
     #draws the background
-    display.blit(backgroundMap, (0,-400))
+    display.blit(background, (0,0))
     # this is the loop where we do all of the computations for every person
     for person in people:
         # this code draws the person and any areas of effect they have(e.g. social distancing distance, infection spread distance etc.)
