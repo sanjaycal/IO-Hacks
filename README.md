@@ -8,3 +8,9 @@ SIR stands for suceptible, infectious, and recovered
 we add a layer to the infected, and ad an infectious stage, as you dont immediately start transmitting when you get infected.
 
 We also split up dead, and immune in the revered part of the model.
+
+
+
+Dependancies:
+Python 3.5 or higher
+Pygame
